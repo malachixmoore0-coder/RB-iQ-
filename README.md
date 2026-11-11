@@ -2,7 +2,7 @@
 
 A game-day study app for running backs: gaps and holes, core run plays, run vision, pass protection, reading coverages, and the *why* behind defensive coverages and offensive play calls. Every quiz question comes with a diagram that highlights exactly what the question is about.
 
-Live version: https://rb-iq-gameday.higgsfield.app
+Open the app: https://malachixmoore0-coder.github.io/rb-iq-/ (also live at https://rb-iq-gameday.higgsfield.app)
 
 ## What's inside
 
