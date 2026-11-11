@@ -17,6 +17,13 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
+      - name: Fetch intro film
+        run: |
+          mkdir -p public/assets/world
+          for f in scene-01.mp4 scene-01-mobile.mp4 scene-01-poster.png scene-01-mobile-poster.png; do
+            curl -fsSL "https://rb-iq-gameday.higgsfield.app/assets/world/$f" -o "public/assets/world/$f" || echo "::warning::Could not fetch $f"
+          done
+          ls -la public/assets/world
       - run: npm run build
       - run: touch dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4

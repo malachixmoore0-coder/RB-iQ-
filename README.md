@@ -58,4 +58,4 @@ src/
 
 ## Intro film
 
-The scroll-driven intro film and its poster are loaded from the live site. To host them yourself, put `scene-01.mp4`, `scene-01-mobile.mp4` and `scene-01-poster.png` in a folder and build with `VITE_FILM_BASE=<that folder's URL>`.
+The scroll-driven intro film and its posters are copied from the live site into `public/assets/world/` by the deploy workflow at build time.
