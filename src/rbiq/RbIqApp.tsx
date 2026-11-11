@@ -244,7 +244,7 @@ function WeekView({ week, tab, best, setTab, back, onDone }: { week: Week; tab: 
               {l.diagram ? (
                 <div className="rbiq-lesson__fig">
                   <DiagramView d={l.diagram} letters={l.diagram.kind === "gap"} />
-                  {(l.diagram.kind === "gap" || l.diagram.kind === "play") && l.diagram.label ? <p className="rbiq-cap">{l.diagram.label}</p> : null}
+                  {l.diagram.kind === "gap" && l.diagram.label ? <p className="rbiq-cap">{l.diagram.label}</p> : null}
                 </div>
               ) : null}
               <ul>

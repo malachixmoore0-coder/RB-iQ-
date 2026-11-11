@@ -304,8 +304,8 @@ const TECHS: [string, number, number][] = [
 type PlaySpec = Extract<DiagramSpec, { kind: "play" }>;
 
 export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
-  const qb = d.qbSet ? { x: 200, y: 258 } : { x: 200, y: 240 };
-  const rb = d.qbSet ? { x: 234, y: 262 } : { x: 200, y: 274 };
+  const qb = d.qbSet ? { x: 200, y: 258 } : { x: 200, y: d.lead ? 234 : 240 };
+  const rb = d.qbSet ? { x: 234, y: 262 } : { x: 200, y: d.lead ? 280 : 274 };
   const pullIdx = new Set((d.pullers ?? []).map((p) => p.from));
   const aimX = d.target ?? (d.aim ? GAP_X[d.aim] : undefined);
 
@@ -349,7 +349,15 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
   const minX = Math.max(0, Math.min(...xs) - 26);
   const maxX = Math.min(400, Math.max(...xs) + 26);
   const minY = Math.max(0, Math.min(...ys) - 24);
-  const viewBox = `${minX} ${minY} ${maxX - minX} ${288 - minY}`;
+  const viewBox = `${minX} ${minY} ${maxX - minX} ${290 - minY}`;
+  const chip = d.label ? (
+    <g className="rbiq-chip">
+      <rect x={minX + 8} y={minY + 8} width={d.label.length * 6.6 + 18} height={20} rx="3" />
+      <text x={minX + 17} y={minY + 22}>
+        {d.label.toUpperCase()}
+      </text>
+    </g>
+  ) : null;
 
   return (
     <Field label={d.label ?? "Line of scrimmage diagram"} viewBox={viewBox}>
@@ -408,6 +416,24 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
           ) : null}
         </g>
       ))}
+      {d.draw
+        ? LX.slice(0, 5).map((x) => (
+            <line key={`set${x}`} className="rbiq-step" x1={x} y1={218} x2={x} y2={230} markerEnd="url(#rbiq-arrow)" />
+          ))
+        : null}
+      {d.draw ? <line className="rbiq-move" x1={200} y1={246} x2={200} y2={262} markerEnd="url(#rbiq-arrow)" /> : null}
+      {d.draw ? (
+        <>
+          <line className="rbiq-move rbiq-move--hl" x1={158} y1={186} x2={132} y2={230} markerEnd="url(#rbiq-arrow-gold)" />
+          <line className="rbiq-move rbiq-move--hl" x1={272} y1={186} x2={300} y2={230} markerEnd="url(#rbiq-arrow-gold)" />
+        </>
+      ) : null}
+      {d.lead ? (
+        <>
+          <OffenseO x={200} y={257} />
+          <path className="rbiq-pull" d={`M200 249 Q ${aimX ?? 245} 236 ${aimX ?? 245} 200 L 245 168`} markerEnd="url(#rbiq-arrow-gold)" />
+        </>
+      ) : null}
       {d.pitch ? <line className="rbiq-pitch" x1={qb.x + 6} y1={qb.y + 4} x2={242} y2={264} /> : null}
       {rbPath}
       <OffenseO x={qb.x} y={qb.y} />
@@ -421,6 +447,7 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
           <Defender p={p} />
         </g>
       ))}
+      {chip}
     </Field>
   );
 }

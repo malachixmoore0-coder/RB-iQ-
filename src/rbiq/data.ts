@@ -74,6 +74,10 @@ export type Diagram =
       box?: boolean;
       /** RB stays in to protect (shotgun set beside QB). */
       qbSet?: boolean;
+      /** Fullback lead blocker (iso). */
+      lead?: boolean;
+      /** Draw action: line pass sets, QB drops, delayed handoff. */
+      draw?: boolean;
       /** Draw technique numbers above the line. */
       techs?: boolean;
       defenders?: Def[];
@@ -272,9 +276,13 @@ export const WEEKS: Week[] = [
     lessons: [
       { title: "Inside zone", points: ["Aiming point: the play-side guard's outside hip.", "Read key: the first down lineman from the center to the play side.", "Options: bang it front side, bend it back behind the center, or bounce (rare).", "Most of your yards come on the bend. Press, then one cut."], diagram: { kind: "gap", gap: "A-R", label: "Inside zone aiming point" } },
       { title: "Outside zone (stretch)", points: ["Aiming point: outside hip of the play-side tackle or tight end.", "Read key: the first defender outside the tackle, the edge player.", "If the edge gets reached, bounce outside. If he widens, cut up inside the block.", "Stay on your track. Do not drift flat to the sideline."], diagram: { kind: "gap", gap: "C-R", label: "Outside zone aiming point" } },
-      { title: "Power and counter", points: ["Power: backside guard pulls and kicks out the end. Hit the play-side B gap inside his block.", "Counter: two pullers, one kicks out and one wraps through. Take a counter step, be patient, then explode.", "Read the puller's block, not the whole defense."] },
-      { title: "Duo, iso, trap", points: ["Duo: double teams with no pullers, aimed at the linebacker. Run off his leverage. If he goes in, you go out.", "Iso: a lead blocker isolates a linebacker. Stay a yard behind him and cut off his block.", "Trap: a guard traps a defensive lineman. A quick hitter, full speed from the snap."] },
-      { title: "Toss, sweep, draw", points: ["Toss and sweep: catch the ball first, then gain depth and speed. Read the force defender and either beat him outside or cut up inside.", "Draw: sell the pass for a beat, take the late handoff, then burst through the lane the pass rush created."] },
+      { title: "Power", points: ["Family: gap scheme. The front side down blocks, the backside guard pulls and kicks out the end.", "Aiming point: the play-side B gap, inside the kick-out block.", "Stay tight to the puller's hip and read his block, not the whole defense."] },
+      { title: "Counter", points: ["Family: gap scheme with two pullers. The first kicks out the end, the second wraps through to the linebacker.", "Take a counter step away to freeze the linebackers, be patient for the pullers, then explode.", "Follow the wrapper through the hole."] },
+      { title: "Duo", points: ["Family: gap-style run with double teams and no pullers, aimed at the linebacker.", "Aiming point: the play-side A gap, pressing at the Mike.", "Run off his leverage. If he goes in, you go out."] },
+      { title: "Iso (lead)", points: ["Family: man scheme. A fullback or H-back leads up the hole and isolates a linebacker.", "Stay a yard behind the lead blocker and cut off his block.", "Finish through contact: this is a downhill, physical run."] },
+      { title: "Trap", points: ["Family: gap scheme. The play-side tackle is left unblocked on purpose, then a pulling guard traps him.", "Aiming point: the A gap right behind the trap block.", "A quick hitter. Full speed from the snap, straight downhill."] },
+      { title: "Toss / sweep", points: ["Family: perimeter run. The QB pitches the ball and you attack the edge.", "Catch the ball first, then gain depth and speed.", "Read the force defender: beat him outside or cut up inside him."] },
+      { title: "Draw", points: ["Family: delayed run. The line pass sets, the QB shows a drop back, and the rush runs upfield.", "Sell the pass for a beat, take the late handoff, then burst through the lane the rush created.", "Best against long yardage and teams with an aggressive pass rush."] },
     ],
     quiz: [
       { id: "w2q1", prompt: "On inside zone, what is the RB's typical aiming point?", options: ["Outside hip of the tight end", "Play-side guard's outside hip", "Backside tackle", "The sideline"], answer: 1, why: "Inside zone aims at the play-side guard's outside hip (around the A/B gap) and reads the first down lineman from the center." },
@@ -285,6 +293,9 @@ export const WEEKS: Week[] = [
       { id: "w2q6", prompt: "The quickest hitting run in the list is usually:", options: ["Outside zone", "Trap", "Toss", "Counter"], answer: 1, why: "Trap hits fast behind a guard who traps an unblocked lineman. Full speed from the snap, straight downhill." },
       { id: "w2q7", prompt: "On a toss, what comes first?", options: ["Reading the safety", "Catching the ball", "Cutting upfield", "Stiff arm"], answer: 1, why: "Ball first. A dropped toss is a fumble behind the line. Secure it, then get depth and speed to the edge." },
       { id: "w2q8", prompt: "The aiming point for this play is highlighted. Which run is most likely?", options: ["Inside zone", "Outside zone", "Trap", "QB sneak"], answer: 1, diagram: { kind: "gap", gap: "D-R" }, why: "An aiming point on the edge, outside the tight end, is outside zone or stretch territory." },
+      { id: "w2q9", prompt: "Name this play.", options: ["Iso", "Counter", "Toss", "Inside zone"], answer: 0, why: "A fullback leads up the hole to isolate the highlighted linebacker while the line blocks man on man. That is iso (lead). Stay a yard behind the lead blocker." },
+      { id: "w2q10", prompt: "Name this play.", options: ["Power", "Draw", "Trap", "Outside zone"], answer: 1, why: "The line pass sets (arrows back), the QB shows a drop back and the ends rush upfield. The RB takes a delayed handoff through the lane the rush created. That is a draw." },
+      { id: "w2q11", prompt: "Name this play.", options: ["Outside zone", "Power", "Inside zone", "Toss"], answer: 2, why: "Every lineman steps play side together (zone), the RB aims at the guard's outside hip and reads the highlighted down lineman. That is inside zone." },
     ],
   },
   {
@@ -411,7 +422,7 @@ for (const w of WEEKS) {
   });
   w.lessons = w.lessons.map((l) => {
     const d = LESSON_VISUALS[`${w.id}:${l.title}`];
-    return d && !l.diagram ? { ...l, diagram: d } : l;
+    return d ? { ...l, diagram: d } : l;
   });
 }
 

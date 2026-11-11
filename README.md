@@ -9,13 +9,13 @@ Live version: https://rb-iq-gameday.higgsfield.app
 - **Player card**: an RB IQ overall rating built from five attributes (Gap Knowledge, Run Reads, Pass Pro, Coverage ID, Situational IQ) that climbs as you pass quizzes, plus XP and levels from Walk-on to All-American.
 - **Season map**: 7 weeks, each with a Study tab and a Quiz tab.
   1. Gaps and Holes
-  2. Core Run Plays
+  2. Core Run Plays (inside zone, outside zone, power, counter, duo, iso, trap, toss and draw, each with a labeled diagram)
   3. Run Vision
   4. Pass Pro and Routes
   5. Reading Coverages
   6. Why the Defense Calls It (down and distance, field position, score, clock, personnel)
   7. Why the Offense Calls It
-- **Visual quizzes**: 56 questions. Gold always marks what the question is about (a gap, a defender, a puller, a blitzer, a safety rotation, receivers, or the scoreboard cells that matter). Situation questions show a scoreboard, a field-position strip with the line to gain, and the offensive formation.
+- **Visual quizzes**: 59 questions. Gold always marks what the question is about (a gap, a defender, a puller, a blitzer, a safety rotation, receivers, or the scoreboard cells that matter). Situation questions show a scoreboard, a field-position strip with the line to gain, and the offensive formation.
 - **Shot Clock Drill**: name 10 random coverages, 8 seconds each.
 - **Coverage Library**: Cover 0, 1, 2, 2-Man, Tampa 2, 3, 4 and 6, each drawn before and after the snap with tells, strengths, weaknesses, when it gets called and what it means for the RB.
 - **Final exam**: 20 random questions from every week on a 20 second clock.

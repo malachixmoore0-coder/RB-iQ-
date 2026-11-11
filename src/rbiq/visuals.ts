@@ -32,11 +32,11 @@ export const QUIZ_VISUALS: Record<string, Visual> = {
   w1q4: { prompt: "In the most common numbering system, what hole number is highlighted?", options: ["3 hole", "4 hole", "2 hole", "6 hole"], answer: 1, diagram: play({ gap: "B-R" }) },
   w1q6: {
     prompt: "Every lineman steps the same direction (arrows). On this kind of run, where is the hole?",
-    diagram: play({ zone: "R", defenders: DL().concat(LB()), path: "zone" }),
+    diagram: play({ label: "Zone run right",  zone: "R", defenders: DL().concat(LB()), path: "zone" }),
   },
   w1q7: {
     prompt: "The highlighted guard pulls on this gap scheme. What is your main job?",
-    diagram: play({ pullers: [{ from: 1, to: 268 }], aim: "B-R", defenders: DL().concat(LB()) }),
+    diagram: play({ label: "Power right",  pullers: [{ from: 1, to: 268 }], aim: "B-R", defenders: DL().concat(LB()) }),
   },
   w1q8: {
     prompt: "The highlighted defender lines up outside the tight end. What technique is he?",
@@ -47,34 +47,37 @@ export const QUIZ_VISUALS: Record<string, Visual> = {
   // Week 2
   w2q1: {
     prompt: "This is inside zone. What is the highlighted aiming point?",
-    diagram: play({ aim: "B-R", target: 238, defenders: DL().concat(LB()) }),
+    diagram: play({ label: "Inside zone right",  aim: "B-R", target: 238, defenders: DL().concat(LB()) }),
   },
   w2q2: {
     prompt: "Outside zone. The highlighted edge defender widens with the tackle (arrow). You should:",
-    diagram: play({ zone: "R", aim: "C-R", defenders: [...DL().slice(0, 3), { x: 272, y: 184, l: "E", hl: true, to: [322, 176] }, ...LB()] }),
+    diagram: play({ label: "Outside zone right",  zone: "R", aim: "C-R", defenders: [...DL().slice(0, 3), { x: 272, y: 184, l: "E", hl: true, to: [322, 176] }, ...LB()] }),
   },
   w2q3: {
     prompt: "Which lineman is pulling on this power play (highlighted)?",
-    diagram: play({ pullers: [{ from: 1, to: 268 }], aim: "B-R", defenders: DL().concat(LB()) }),
+    diagram: play({ label: "Power right",  pullers: [{ from: 1, to: 268 }], aim: "B-R", defenders: DL().concat(LB()) }),
   },
   w2q4: {
     prompt: "Duo: double teams up front, no pullers. Who is the highlighted defender you read?",
     options: ["The free safety", "The Mike linebacker", "The 3 technique", "The corner"],
-    diagram: play({ doubles: [[1, 2], [3, 4]], aim: "A-R", defenders: DL().concat(LB("M")) }),
+    diagram: play({ label: "Duo",  doubles: [[1, 2], [3, 4]], aim: "A-R", defenders: DL().concat(LB("M")) }),
   },
   w2q5: {
     prompt: "Two linemen pull on this play (highlighted). Which play is it?",
-    diagram: play({ pullers: [{ from: 1, to: 268 }, { from: 0, to: 250 }], aim: "B-R", counter: true, defenders: DL().concat(LB()) }),
+    diagram: play({ label: "Name this play",  pullers: [{ from: 1, to: 268 }, { from: 0, to: 250 }], aim: "B-R", counter: true, defenders: DL().concat(LB()) }),
   },
   w2q6: {
     prompt: "The guard traps the highlighted, unblocked lineman and the RB hits it fast. Which play is it?",
     options: ["Outside zone", "Trap", "Toss", "Counter"],
-    diagram: play({ pullers: [{ from: 1, to: 238 }], aim: "A-R", defenders: [{ x: 158, y: 184 }, { x: 188, y: 184 }, { x: 242, y: 184, hl: true }, { x: 272, y: 184 }, ...LB()] }),
+    diagram: play({ label: "Name this play",  pullers: [{ from: 1, to: 238 }], aim: "A-R", defenders: [{ x: 158, y: 184 }, { x: 188, y: 184 }, { x: 242, y: 184, hl: true }, { x: 272, y: 184 }, ...LB()] }),
   },
   w2q7: {
     prompt: "The QB pitches you the ball (dashed line) to the edge. What comes first?",
-    diagram: play({ aim: "D-R", pitch: true, defenders: DL().concat(LB()) }),
+    diagram: play({ label: "Toss right",  aim: "D-R", pitch: true, defenders: DL().concat(LB()) }),
   },
+  w2q9: { diagram: play({ label: "Name this play", lead: true, aim: "B-R", defenders: DL().concat(LB("S")) }) },
+  w2q10: { diagram: play({ label: "Name this play", draw: true, aim: "A-R", defenders: DL().concat(LB()) }) },
+  w2q11: { diagram: play({ label: "Name this play", zone: "R", aim: "B-R", target: 238, defenders: DL(2).concat(LB()) }) },
   // Week 3
   w3q1: {
     prompt: "Count the highlighted defenders in the box against your 6 blockers. This means:",
@@ -83,15 +86,15 @@ export const QUIZ_VISUALS: Record<string, Visual> = {
   w3q2: {
     prompt: "Inside zone. Right after the handoff, where should your eyes be? (The highlighted defender is your read key.)",
     options: ["The end zone", "The highlighted read key", "The QB", "The sideline"],
-    diagram: play({ zone: "R", aim: "B-R", defenders: DL(2).concat(LB()) }),
+    diagram: play({ label: "Inside zone right",  zone: "R", aim: "B-R", defenders: DL(2).concat(LB()) }),
   },
   w3q3: {
     prompt: "You press the aiming point (solid) before cutting back (dashed). Why press instead of cutting early?",
-    diagram: play({ zone: "R", aim: "B-R", path: "press-cut", defenders: DL().concat(LB()) }),
+    diagram: play({ label: "Inside zone right",  zone: "R", aim: "B-R", path: "press-cut", defenders: DL().concat(LB()) }),
   },
   w3q4: {
     prompt: "Your highlighted read key steps inside (arrow). You:",
-    diagram: play({ zone: "R", aim: "B-R", defenders: [...DL().slice(0, 2), { x: 242, y: 184, l: "T", hl: true, to: [222, 194] }, { x: 272, y: 184 }, ...LB()] }),
+    diagram: play({ label: "Inside zone right",  zone: "R", aim: "B-R", defenders: [...DL().slice(0, 2), { x: 242, y: 184, l: "T", hl: true, to: [222, 194] }, { x: 272, y: 184 }, ...LB()] }),
   },
   w3q5: {
     prompt: "The highlighted safety rolls down right before the snap (arrow). That most likely adds:",
@@ -172,12 +175,18 @@ export const QUIZ_VISUALS: Record<string, Visual> = {
 
 export const LESSON_VISUALS: Record<string, Diagram> = {
   "w1:Defensive techniques": play({ techs: true }),
-  "w1:Zone vs gap blocking": play({ zone: "R", path: "zone", defenders: DL().concat(LB()) }),
-  "w2:Power and counter": play({ pullers: [{ from: 1, to: 268 }], aim: "B-R", defenders: DL().concat(LB()) }),
-  "w2:Duo, iso, trap": play({ doubles: [[1, 2], [3, 4]], aim: "A-R", defenders: DL().concat(LB("M")) }),
-  "w2:Toss, sweep, draw": play({ aim: "D-R", pitch: true, defenders: DL().concat(LB()) }),
+  "w1:Zone vs gap blocking": play({ label: "Zone: linemen step together",  zone: "R", path: "zone", defenders: DL().concat(LB()) }),
+  "w2:Inside zone": play({ label: "Inside zone right", zone: "R", aim: "B-R", target: 238, defenders: DL(2).concat(LB()) }),
+  "w2:Outside zone (stretch)": play({ label: "Outside zone right", zone: "R", aim: "C-R", defenders: [...DL().slice(0, 3), { x: 272, y: 184, l: "E", hl: true }, ...LB()] }),
+  "w2:Power": play({ label: "Power right", pullers: [{ from: 1, to: 268 }], aim: "B-R", defenders: DL().concat(LB()) }),
+  "w2:Counter": play({ label: "Counter right", pullers: [{ from: 1, to: 268 }, { from: 0, to: 250 }], aim: "B-R", counter: true, defenders: DL().concat(LB()) }),
+  "w2:Duo": play({ label: "Duo right", doubles: [[1, 2], [3, 4]], aim: "A-R", defenders: DL().concat(LB("M")) }),
+  "w2:Iso (lead)": play({ label: "Iso right", lead: true, aim: "B-R", defenders: DL().concat(LB("S")) }),
+  "w2:Trap": play({ label: "Trap right", pullers: [{ from: 1, to: 238 }], aim: "A-R", defenders: [{ x: 158, y: 184 }, { x: 188, y: 184 }, { x: 242, y: 184, hl: true }, { x: 272, y: 184 }, ...LB()] }),
+  "w2:Toss / sweep": play({ label: "Toss right", aim: "D-R", pitch: true, defenders: DL().concat(LB()) }),
+  "w2:Draw": play({ label: "Draw", draw: true, aim: "A-R", defenders: DL().concat(LB("M")) }),
   "w3:Pre-snap checklist": play({ box: true, defenders: [...DL(2), ...LB(), { x: 120, y: 160, l: "S" }] }),
-  "w3:Post-snap progression": play({ zone: "R", aim: "B-R", path: "press-cut", defenders: DL(2).concat(LB()) }),
+  "w3:Post-snap progression": play({ label: "Inside zone right",  zone: "R", aim: "B-R", path: "press-cut", defenders: DL(2).concat(LB()) }),
   "w4:Inside-out rule": play({ qbSet: true, defenders: [...DL(), { x: 205, y: 156, l: "1", hl: true, to: [214, 192] }, { x: 245, y: 156, l: "2", hl: true, to: [246, 192] }, { x: 330, y: 176, l: "3", hl: true, to: [310, 214] }] }),
   "w6:Personnel and formation": { kind: "coverage", id: "c1", view: "pre", motion: true },
   "w7:Run it where they are not": play({ box: true, defenders: [...DL(), ...LB(), { x: 120, y: 80, l: "S" }, { x: 285, y: 80, l: "S" }] }),
