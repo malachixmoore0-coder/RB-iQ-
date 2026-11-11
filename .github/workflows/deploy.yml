@@ -18,17 +18,22 @@ jobs:
           node-version: 22
       - run: npm ci
       - name: Fetch and encode intro film
+        continue-on-error: true
         run: |
-          set -e
           mkdir -p public/assets/world
-          SRC="https://d8j0ntlcm91z4.cloudfront.net/user_3IyamoeRdPrHnqa8Qdx1XvZjWur/hf_20261111_223720_d2a382c9-de4a-415b-a189-77aab8cb5145.mp4"
-          curl -fsSL -A "Mozilla/5.0" "$SRC" -o /tmp/source.mp4
           W=public/assets/world
-          ffmpeg -v error -y -i /tmp/source.mp4 -an -vf "unsharp=5:5:0.8:5:5:0.0" -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 8 -keyint_min 8 -sc_threshold 0 -movflags +faststart $W/scene-01.mp4
-          ffmpeg -v error -y -i /tmp/source.mp4 -an -vf "scale=-2:'min(720,ih)',unsharp=5:5:0.6:5:5:0.0" -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p -g 4 -keyint_min 4 -sc_threshold 0 -movflags +faststart $W/scene-01-mobile.mp4
-          ffmpeg -v error -y -i $W/scene-01.mp4 -frames:v 1 -q:v 2 $W/scene-01-poster.png
-          ffmpeg -v error -y -i $W/scene-01-mobile.mp4 -frames:v 1 -q:v 2 $W/scene-01-mobile-poster.png
-          ls -la $W
+          LOG=public/film-log.txt
+          {
+            which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+            SRC="https://d8j0ntlcm91z4.cloudfront.net/user_3IyamoeRdPrHnqa8Qdx1XvZjWur/hf_20261111_223720_d2a382c9-de4a-415b-a189-77aab8cb5145.mp4"
+            curl -fsSL -A "Mozilla/5.0" "$SRC" -o /tmp/source.mp4 && echo "source ok $(stat -c%s /tmp/source.mp4)"
+            ffmpeg -v error -y -i /tmp/source.mp4 -an -vf "unsharp=5:5:0.8:5:5:0.0" -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 8 -keyint_min 8 -sc_threshold 0 -movflags +faststart $W/scene-01.mp4
+            ffmpeg -v error -y -i /tmp/source.mp4 -an -vf "scale=-2:'min(720,ih)',unsharp=5:5:0.6:5:5:0.0" -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p -g 4 -keyint_min 4 -sc_threshold 0 -movflags +faststart $W/scene-01-mobile.mp4
+            ffmpeg -v error -y -i $W/scene-01.mp4 -frames:v 1 -q:v 2 $W/scene-01-poster.png
+            ffmpeg -v error -y -i $W/scene-01-mobile.mp4 -frames:v 1 -q:v 2 $W/scene-01-mobile-poster.png
+            ls -la $W
+          } > $LOG 2>&1
+          cat $LOG
       - run: npm run build
       - run: touch dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4
