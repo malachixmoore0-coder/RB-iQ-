@@ -34,6 +34,15 @@ jobs:
             ls -la $W
           } > $LOG 2>&1
           cat $LOG
+      - name: App icons
+        continue-on-error: true
+        run: |
+          which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+          mkdir -p public/icons
+          curl -fsSL -A "Mozilla/5.0" "https://d8j0ntlcm91z4.cloudfront.net/user_3IyamoeRdPrHnqa8Qdx1XvZjWur/hf_20261112_000932_696490b8-3043-4afb-ab6c-be68bc68b1e8.png" -o /tmp/icon.png
+          for s in 32 180 192 512; do ffmpeg -v error -y -i /tmp/icon.png -vf "scale=${s}:${s}:flags=lanczos" public/icons/icon-$s.png; done
+          mv public/icons/icon-180.png public/icons/apple-touch-icon.png
+          ls -la public/icons
       - run: npm run build
       - run: touch dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4
