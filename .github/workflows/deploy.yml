@@ -43,6 +43,18 @@ jobs:
           for s in 32 180 192 512; do ffmpeg -v error -y -i /tmp/icon.png -vf "scale=${s}:${s}:flags=lanczos" public/icons/icon-$s.png; done
           mv public/icons/icon-180.png public/icons/apple-touch-icon.png
           ls -la public/icons
+      - name: Player renders
+        run: |
+          mkdir -p public/players
+          B=https://d2ol7oe51mr4n9.cloudfront.net/user_3IyamoeRdPrHnqa8Qdx1XvZjWur
+          curl -fsSL -A "Mozilla/5.0" $B/a8a770fc-9ec6-416e-bfa1-9fd54082c20f.png -o public/players/ol.png
+          curl -fsSL -A "Mozilla/5.0" $B/38327e3b-78eb-4b03-a498-3c86c7507bae.png -o public/players/qb.png
+          curl -fsSL -A "Mozilla/5.0" $B/19adcea8-aa5b-4061-9abf-0c7f343d12b6.png -o public/players/rb.png
+          curl -fsSL -A "Mozilla/5.0" $B/f2ff7c09-ff7e-4bc9-897e-606aa6bf6fdb.png -o public/players/wr.png
+          curl -fsSL -A "Mozilla/5.0" $B/65edcc22-fa68-459d-9a64-22232ff9c257.png -o public/players/dl.png
+          curl -fsSL -A "Mozilla/5.0" $B/5e6cf88b-ba68-4b25-9528-9514818930c8.png -o public/players/lb.png
+          curl -fsSL -A "Mozilla/5.0" $B/44953d08-38b3-4ffd-8acc-5ac766755260.png -o public/players/db.png
+          ls -la public/players
       - run: npm run build
       - run: touch dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4

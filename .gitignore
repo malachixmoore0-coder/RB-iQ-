@@ -4,3 +4,4 @@ dist
 *.log
 public/assets/world
 public/icons
+public/players

@@ -534,3 +534,6 @@
 .rbiq-fig--hl .rbiq-fig__jersey { stroke: var(--rb-gold); stroke-width: 1.6; }
 .rbiq-fig--hl .rbiq-fig__helmet { stroke: var(--rb-gold); stroke-width: 1.4; }
 .rbiq-legend__blue { color: #7fbaff; font-weight: 700; }
+.rbiq-fig__tag rect { fill: rgba(10, 22, 48, 0.78); }
+.rbiq-fig__tag text { fill: #fff; font-family: var(--rb-mono); font-weight: 700; font-size: 6px; }
+.rbiq-fig--hl image { filter: drop-shadow(0 0 2.5px #f2b705) drop-shadow(0 0 1px #f2b705); }

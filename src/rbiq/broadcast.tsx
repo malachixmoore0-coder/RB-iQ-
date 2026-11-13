@@ -113,55 +113,63 @@ export interface Person {
   muted?: boolean;
 }
 
+type Kind = "ol" | "qb" | "rb" | "wr" | "dl" | "lb" | "db";
+
+/** Rendered player sprites (Higgsfield renders, transparent PNGs, 220px tall). */
+const SPRITES: Record<Kind, { w: number; h: number; height: number }> = {
+  ol: { w: 162, h: 220, height: 40 },
+  qb: { w: 133, h: 220, height: 46 },
+  rb: { w: 147, h: 220, height: 44 },
+  wr: { w: 130, h: 220, height: 46 },
+  dl: { w: 155, h: 220, height: 40 },
+  lb: { w: 138, h: 220, height: 45 },
+  db: { w: 137, h: 220, height: 46 },
+};
+const SPRITE_BASE = `${import.meta.env.BASE_URL ?? "/"}players/`;
+
+function kindOf(p: Person): Kind {
+  const l = (p.l ?? "").toUpperCase();
+  if (p.side === "off") {
+    if (l === "QB") return "qb";
+    if (l === "RB" || l === "FB" || l === "SB") return "rb";
+    if (l === "WR" || ["X", "H", "Y", "Z"].includes(l)) return "wr";
+    return "ol";
+  }
+  if (["C", "N", "F", "CB", "FS", "SS"].includes(l)) return "db";
+  if (["OLB", "ILB", "W", "M", "B", "A", "OH"].includes(l)) return "lb";
+  if (l === "S") return p.y < 150 ? "db" : "lb";
+  if (p.y >= 176 && Math.abs(p.x - 200) < 130) return "dl";
+  return p.y >= 140 ? "lb" : "db";
+}
+
 function Figure({ p, P, scale }: { p: Person; P: Proj; scale: number }) {
   const g = P(p.x, p.y);
   const u = g.s * scale;
-  const off = p.side === "off";
+  const k = kindOf(p);
+  const sp = SPRITES[k];
+  const h = sp.height;
+  const w = (sp.w / sp.h) * h;
   const label = p.l ?? "";
-  const cls = `rbiq-fig rbiq-fig--${p.side}${p.hl ? " rbiq-fig--hl" : ""}${p.muted ? " rbiq-fig--muted" : ""}`;
-  const txt = label.length > 2 ? 4.4 : 5.6;
+  const off = p.side === "off";
+  const showBadge = (!off && label) || (off && p.hl && label);
+  const cls = `rbiq-fig rbiq-fig--${p.side}${p.hl ? " rbiq-fig--hl" : ""}`;
   return (
-    <g className={cls} transform={`translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) scale(${u.toFixed(3)} ${(u * 0.8).toFixed(3)})`}>
-      {p.hl ? <ellipse className="rbiq-fig__glow" cx="0" cy="0" rx="15" ry="5" /> : null}
-      <ellipse className="rbiq-fig__shadow" cx="1.5" cy="0.5" rx="9" ry="2.6" />
-      {/* legs + cleats */}
-      <rect className="rbiq-fig__pants" x="-6" y="-12" width="4.6" height="11" rx="1.6" />
-      <rect className="rbiq-fig__pants" x="1.4" y="-12" width="4.6" height="11" rx="1.6" />
-      <rect className="rbiq-fig__cleat" x="-6.4" y="-1.8" width="5.4" height="2" rx="0.8" />
-      <rect className="rbiq-fig__cleat" x="1" y="-1.8" width="5.4" height="2" rx="0.8" />
-      {/* arms */}
-      <rect className="rbiq-fig__arm" x="-11" y="-23" width="3.6" height="11" rx="1.6" />
-      <rect className="rbiq-fig__arm" x="7.4" y="-23" width="3.6" height="11" rx="1.6" />
-      {/* torso + pads */}
-      <rect className="rbiq-fig__jersey" x="-8" y="-24" width="16" height="14" rx="3" />
-      <ellipse className="rbiq-fig__jersey" cx="0" cy="-23" rx="9.6" ry="3.4" />
-      {label && off ? (
-        <text className="rbiq-fig__num" x="0" y="-14.4" textAnchor="middle" style={{ fontSize: txt }}>
-          {label}
-        </text>
-      ) : null}
-      {/* helmet */}
-      <circle className="rbiq-fig__helmet" cx="0" cy="-30" r="5.4" />
-      {off ? (
-        <rect className="rbiq-fig__stripe" x="-0.8" y="-35.3" width="1.6" height="10.6" />
-      ) : (
-        <>
-          <path className="rbiq-fig__mask" d="M-3.6 -29.2 H3.6 M-3.2 -27 H3.2 M0 -29.2 V-25.4" />
-        </>
-      )}
-      {/* defender badge */}
-      {!off && label ? (
-        <g className="rbiq-fig__badge">
-          <circle cx="0" cy="-45" r="7" />
-          <text x="0" y={label.length > 2 ? -43.4 : -42.8} textAnchor="middle" style={{ fontSize: label.length > 2 ? 5 : 6.6 }}>
+    <g className={cls} transform={`translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) scale(${u.toFixed(3)})`}>
+      {p.hl ? <ellipse className="rbiq-fig__glow" cx="0" cy="-1" rx={w * 0.62} ry={w * 0.2} /> : null}
+      <ellipse className="rbiq-fig__shadow" cx="2" cy="-0.5" rx={w * 0.46} ry={w * 0.13} />
+      <image href={`${SPRITE_BASE}${k}.png`} x={-w / 2} y={-h} width={w} height={h} preserveAspectRatio="xMidYMax meet" />
+      {off && label && !p.hl ? (
+        <g className="rbiq-fig__tag">
+          <rect x={-label.length * 2.4 - 3} y={2} width={label.length * 4.8 + 6} height={8} rx={2} />
+          <text x="0" y="8.4" textAnchor="middle">
             {label}
           </text>
         </g>
       ) : null}
-      {off && p.hl && label ? (
-        <g className="rbiq-fig__badge rbiq-fig__badge--off">
-          <circle cx="0" cy="-45" r="7" />
-          <text x="0" y={label.length > 2 ? -43.4 : -42.8} textAnchor="middle" style={{ fontSize: label.length > 2 ? 5 : 6.6 }}>
+      {showBadge ? (
+        <g className={`rbiq-fig__badge${off ? " rbiq-fig__badge--off" : ""}`}>
+          <circle cx="0" cy={-h - 9} r="7.5" />
+          <text x="0" y={-h - 9 + (label.length > 2 ? 1.8 : 2.4)} textAnchor="middle" style={{ fontSize: label.length > 2 ? 5.2 : 7 }}>
             {label}
           </text>
         </g>
