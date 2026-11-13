@@ -1,5 +1,5 @@
 Selecting previously unselected package libva2:amd64.
-(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 213197 files and directories currently installed.)
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 213647 files and directories currently installed.)
 Preparing to unpack .../00-libva2_2.23.0-1ubuntu1_amd64v3.deb ...
 Unpacking libva2:amd64 (2.23.0-1ubuntu1) ...
 Selecting previously unselected package libva-drm2:amd64.
@@ -373,9 +373,9 @@ No user sessions are running outdated binaries.
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
 source ok 7095027
 total 19516
-drwxr-xr-x 2 runner runner     4096 Nov 13 14:09 .
-drwxr-xr-x 3 runner runner     4096 Nov 13 14:09 ..
--rw-r--r-- 1 runner runner   673009 Nov 13 14:09 scene-01-mobile-poster.png
--rw-r--r-- 1 runner runner  6878170 Nov 13 14:09 scene-01-mobile.mp4
--rw-r--r-- 1 runner runner  1260756 Nov 13 14:09 scene-01-poster.png
--rw-r--r-- 1 runner runner 11154487 Nov 13 14:09 scene-01.mp4
+drwxr-xr-x 2 runner runner     4096 Nov 13 16:48 .
+drwxr-xr-x 3 runner runner     4096 Nov 13 16:47 ..
+-rw-r--r-- 1 runner runner   673009 Nov 13 16:48 scene-01-mobile-poster.png
+-rw-r--r-- 1 runner runner  6878170 Nov 13 16:48 scene-01-mobile.mp4
+-rw-r--r-- 1 runner runner  1260756 Nov 13 16:48 scene-01-poster.png
+-rw-r--r-- 1 runner runner 11154487 Nov 13 16:48 scene-01.mp4
