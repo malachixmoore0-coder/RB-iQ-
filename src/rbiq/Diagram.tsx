@@ -456,6 +456,7 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
 
 type FormSpec = Extract<DiagramSpec, { kind: "formation" }>;
 type O = { x: number; y: number; r: "wr" | "te" | "back" | "qb" };
+// Offensive sets. Line: LT 140, LG 170, C 200, RG 230, RT 260 (y 208). Strength is to the right.
 
 const SETS: Record<FormSpec["set"], O[]> = {
   "2te": [
@@ -478,12 +479,36 @@ const SETS: Record<FormSpec["set"], O[]> = {
     { x: 25, y: 207, r: "wr" }, { x: 330, y: 210, r: "wr" }, { x: 375, y: 207, r: "wr" }, { x: 288, y: 208, r: "te" },
     { x: 200, y: 234, r: "qb" }, { x: 200, y: 268, r: "back" },
   ],
+  i: [
+    { x: 30, y: 207, r: "wr" }, { x: 370, y: 207, r: "wr" }, { x: 288, y: 208, r: "te" },
+    { x: 200, y: 232, r: "qb" }, { x: 200, y: 252, r: "back" }, { x: 200, y: 276, r: "back" },
+  ],
+  pistol: [
+    { x: 25, y: 207, r: "wr" }, { x: 330, y: 210, r: "wr" }, { x: 375, y: 207, r: "wr" }, { x: 288, y: 208, r: "te" },
+    { x: 200, y: 242, r: "qb" }, { x: 200, y: 270, r: "back" },
+  ],
+  flexbone: [
+    { x: 40, y: 207, r: "wr" }, { x: 360, y: 207, r: "wr" }, { x: 118, y: 222, r: "back" }, { x: 282, y: 222, r: "back" },
+    { x: 200, y: 232, r: "qb" }, { x: 200, y: 256, r: "back" },
+  ],
+  empty: [
+    { x: 25, y: 207, r: "wr" }, { x: 72, y: 210, r: "wr" }, { x: 312, y: 210, r: "back" }, { x: 345, y: 212, r: "wr" }, { x: 378, y: 207, r: "wr" },
+    { x: 200, y: 252, r: "qb" },
+  ],
+  "22": [
+    { x: 30, y: 207, r: "wr" }, { x: 112, y: 208, r: "te" }, { x: 288, y: 208, r: "te" },
+    { x: 200, y: 232, r: "qb" }, { x: 200, y: 252, r: "back" }, { x: 200, y: 276, r: "back" },
+  ],
+  trips: [
+    { x: 25, y: 207, r: "wr" }, { x: 302, y: 212, r: "wr" }, { x: 340, y: 210, r: "wr" }, { x: 378, y: 207, r: "wr" },
+    { x: 200, y: 252, r: "qb" }, { x: 170, y: 252, r: "back" },
+  ],
 };
 
 export function FormationField({ d }: { d: FormSpec }) {
   const offense = SETS[d.set];
-  const spread = d.set === "4wr" || d.set === "gun3";
-  const heavy = d.set === "goal" || d.set === "2te";
+  const spread = d.set === "4wr" || d.set === "gun3" || d.set === "empty" || d.set === "trips";
+  const heavy = d.set === "goal" || d.set === "2te" || d.set === "i" || d.set === "flexbone" || d.set === "22";
   const front: Def[] = [
     { x: d.rush ? 128 : 152, y: 190, l: "E", hl: d.rush, to: d.rush ? [104, 236] : undefined },
     { x: 186, y: 190 },
@@ -505,13 +530,25 @@ export function FormationField({ d }: { d: FormSpec }) {
           ? [{ x: 200, y: 92, l: "F" }]
           : [{ x: 120, y: 88, l: "S" }, { x: 280, y: 88, l: "S" }];
   const corners: Def[] = [{ x: offense[0].x, y: 180, l: "C" }, { x: Math.max(...offense.filter((o) => o.r === "wr" || o.r === "te").map((o) => o.x)), y: 180, l: "C" }];
-  const defs = [...front, ...lbs].map(box).concat(safeties, d.set === "goal" ? [] : corners);
-  const hlRole = d.hl === "te" ? "te" : d.hl === "wr" ? "wr" : d.hl === "backs" ? "back" : null;
+  const defs =
+    d.defense === "none"
+      ? []
+      : d.defenders
+        ? d.defenders
+        : [...front, ...lbs].map(box).concat(safeties, d.set === "goal" ? [] : corners);
+  const hlRole = d.hl === "te" ? "te" : d.hl === "wr" ? "wr" : d.hl === "backs" ? "back" : d.hl === "qb" ? "qb" : null;
+  const ROUTE_CLASS = { route: "rbiq-route", pull: "rbiq-pull", run: "rbiq-path", pitch: "rbiq-pitch", motion: "rbiq-motion" } as const;
 
   return (
     <Field label="Offensive formation and defensive front" viewBox="0 56 400 232">
       {d.box ? <rect className="rbiq-box" x="112" y="138" width="196" height="60" rx="4" /> : null}
       <line className="rbiq-field__los" x1="0" x2="400" y1="198" y2="198" />
+      {(d.routes ?? []).map((r, i) => {
+        const k = r.kind ?? "route";
+        const cls = `${ROUTE_CLASS[k]}${r.hl ? " rbiq-route--hl" : ""}`;
+        const marker = k === "pitch" ? undefined : r.hl || k === "pull" ? "url(#rbiq-arrow-gold)" : k === "run" ? "url(#rbiq-arrow-red)" : "url(#rbiq-arrow)";
+        return <polyline key={`rt${i}`} className={cls} fill="none" points={r.pts.map((p) => p.join(",")).join(" ")} markerEnd={marker} />;
+      })}
       {LX.slice(0, 5).map((x) => (
         <rect key={x} className="rbiq-ol" x={x - 8} y={200} width="16" height="16" rx="3" />
       ))}
@@ -533,6 +570,14 @@ export function FormationField({ d }: { d: FormSpec }) {
           <Defender p={p} />
         </g>
       ))}
+      {d.label ? (
+        <g className="rbiq-chip">
+          <rect x={8} y={64} width={d.label.length * 6.6 + 18} height={20} rx="3" />
+          <text x={17} y={78}>
+            {d.label.toUpperCase()}
+          </text>
+        </g>
+      ) : null}
     </Field>
   );
 }

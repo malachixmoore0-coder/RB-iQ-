@@ -1,7 +1,8 @@
+import { ADVANCED_WEEKS, SEASON_ORDER } from "./advanced";
 import { LESSON_VISUALS, QUIZ_VISUALS } from "./visuals";
 
 export type CoverageId ="c0" | "c1" | "c2" | "c2m" | "t2" | "c3" | "c4" | "c6";
-export type Attr = "gap" | "run" | "cov" | "pro" | "sit";
+export type Attr = "gap" | "front" | "run" | "pro" | "cov" | "scheme" | "sit";
 
 export interface Situation {
   down: string;
@@ -38,16 +39,23 @@ export type Diagram =
   | { kind: "gap"; gap: string; label?: string }
   | {
       kind: "formation";
-      /** Offensive set: 12 personnel, goal line, 4 wide, shotgun 3 wide, 11 personnel under center. */
-      set: "2te" | "goal" | "4wr" | "gun3" | "11";
+      /** Offensive set. */
+      set: "2te" | "goal" | "4wr" | "gun3" | "11" | "i" | "pistol" | "flexbone" | "empty" | "trips" | "22";
       /** Which offensive players to highlight. */
-      hl?: "te" | "wr" | "backs";
+      hl?: "te" | "wr" | "backs" | "qb";
       /** Shade and highlight the box defenders. */
       box?: boolean;
       /** Safety picture: two high, one high, or one high safety rolling into the box. */
       safety?: "two" | "one" | "down";
       /** Defensive ends rushing hard upfield. */
       rush?: boolean;
+      /** Hide the defense to focus on the offense, or replace it with custom defenders. */
+      defense?: "none";
+      defenders?: Def[];
+      /** Drawn paths: routes, pulls, runs, pitches, motion. */
+      routes?: { pts: [number, number][]; kind?: "route" | "pull" | "run" | "pitch" | "motion"; hl?: boolean }[];
+      /** Red chip label in the corner. */
+      label?: string;
     }
   | {
       kind: "play";
@@ -111,9 +119,11 @@ export interface Week {
 
 export const ATTRS: { id: Attr; label: string }[] = [
   { id: "gap", label: "Gap Knowledge" },
+  { id: "front", label: "Front ID" },
   { id: "run", label: "Run Reads" },
   { id: "pro", label: "Pass Pro" },
   { id: "cov", label: "Coverage ID" },
+  { id: "scheme", label: "Scheme IQ" },
   { id: "sit", label: "Situational IQ" },
 ];
 
@@ -211,7 +221,7 @@ export const COVERAGES: CoverageInfo[] = [
   },
 ];
 
-export const WEEKS: Week[] = [
+const BASE_WEEKS: Week[] = [
   {
     id: "w1",
     tag: "Week 1",
@@ -414,7 +424,7 @@ export const WEEKS: Week[] = [
 ];
 
 // Every quiz question gets its diagram (and any re-worded prompt) from visuals.ts.
-for (const w of WEEKS) {
+for (const w of BASE_WEEKS) {
   w.quiz = w.quiz.map((q) => {
     const v = QUIZ_VISUALS[q.id] ?? {};
     const situation = q.situation ? { ...q.situation, ...v.situation } : v.situation;
@@ -425,6 +435,10 @@ for (const w of WEEKS) {
     return d ? { ...l, diagram: d } : l;
   });
 }
+
+// Full season in teaching order, numbered Week 1..N.
+const BY_ID = new Map([...BASE_WEEKS, ...ADVANCED_WEEKS].map((w) => [w.id, w]));
+export const WEEKS: Week[] = SEASON_ORDER.map((id, i) => ({ ...BY_ID.get(id)!, tag: `Week ${i + 1}` }));
 
 export const ALL_QUESTIONS: (Question & { weekId: string; attr: Attr })[] = WEEKS.flatMap((w) =>
   w.quiz.map((q) => ({ ...q, weekId: w.id, attr: w.attr })),

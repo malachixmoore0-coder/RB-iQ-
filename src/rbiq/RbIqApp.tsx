@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
+import { PHASES } from "./advanced";
 import { ALL_QUESTIONS, ATTRS, COVERAGES, WEEKS } from "./data";
 import type { Attr, CoverageId, Question, Week } from "./data";
 import { CoverageField, DiagramView, SituationBoard } from "./Diagram";
@@ -40,14 +41,13 @@ function useProgress() {
 const LEVELS = ["Walk-on", "Scout Team", "Rotation", "Starter", "All-Conference", "All-American"];
 
 function attrScores(p: Progress): Record<Attr, number> {
-  const b = (id: string) => p.best[id] ?? 0;
-  return {
-    gap: b("w1"),
-    run: (b("w2") + b("w3")) / 2,
-    pro: b("w4"),
-    cov: Math.max(b("w5"), p.drillBest),
-    sit: (b("w6") + b("w7")) / 2,
-  };
+  const out = {} as Record<Attr, number>;
+  for (const a of ATTRS) {
+    const weeks = WEEKS.filter((w) => w.attr === a.id);
+    const avg = weeks.length ? weeks.reduce((s, w) => s + (p.best[w.id] ?? 0), 0) / weeks.length : 0;
+    out[a.id] = a.id === "cov" ? Math.max(avg, p.drillBest) : avg;
+  }
+  return out;
 }
 const toRating = (s: number) => Math.round(40 + 59 * s);
 
@@ -170,12 +170,17 @@ function Season({ p, go }: { p: Progress; go: (v: View) => void }) {
   return (
     <section className="rbiq-season" aria-label="Season schedule">
       <h2 className="rbiq-h2">Your season</h2>
+      <p className="rbiq-season__sub">
+        {WEEKS.length} weeks, {ALL_QUESTIONS.length} questions. Every answer comes with the why.
+      </p>
       <ol className="rbiq-sched">
-        {WEEKS.map((w) => {
+        {WEEKS.map((w, idx) => {
           const best = p.best[w.id] ?? 0;
           const stars = best >= 0.9 ? 3 : best >= 0.75 ? 2 : best > 0 ? 1 : 0;
+          const phase = PHASES.find((ph) => ph.from === idx);
           return (
             <li key={w.id}>
+              {phase ? <p className="rbiq-phase">{phase.title}</p> : null}
               <button className="rbiq-sched__row" type="button" onClick={() => go({ k: "week", id: w.id, tab: "study" })}>
                 <span className="rbiq-sched__tag">{w.tag}</span>
                 <span className="rbiq-sched__title">{w.title}</span>
@@ -200,11 +205,11 @@ function Season({ p, go }: { p: Progress; go: (v: View) => void }) {
           <span>Every shell, its tells and what it means for you</span>
         </button>
       </div>
-      <button className="rbiq-ticket" type="button" onClick={() => go({ k: "exam", qs: shuffle(ALL_QUESTIONS).slice(0, 20) })}>
+      <button className="rbiq-ticket" type="button" onClick={() => go({ k: "exam", qs: shuffle(ALL_QUESTIONS).slice(0, 30) })}>
         <span className="rbiq-ticket__stub">Championship</span>
         <span className="rbiq-ticket__main">
           <strong>Final exam</strong>
-          <span>20 questions from every week, 20 second clock{p.examBest ? `. Best ${Math.round(p.examBest * 100)}%` : ""}</span>
+          <span>30 questions from every week, 20 second clock{p.examBest ? `. Best ${Math.round(p.examBest * 100)}%` : ""}</span>
         </span>
       </button>
     </section>
@@ -266,7 +271,15 @@ function WeekView({ week, tab, best, setTab, back, onDone }: { week: Week; tab: 
 }
 
 function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; seconds?: number; onDone: (pct: number, xp: number) => void; onExit: () => void }) {
-  const qs = useMemo(() => questions, [questions]);
+  // Shuffle the answer order every attempt so position never gives the answer away.
+  const qs = useMemo(
+    () =>
+      questions.map((q) => {
+        const perm = shuffle(q.options.map((_, i) => i));
+        return { ...q, options: perm.map((i) => q.options[i]), answer: perm.indexOf(q.answer) };
+      }),
+    [questions],
+  );
   const [i, setI] = useState(0);
   const [pick, setPick] = useState<number | null>(null);
   const [right, setRight] = useState(0);
@@ -274,7 +287,25 @@ function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; s
   const [xp, setXp] = useState(0);
   const [left, setLeft] = useState(seconds ?? 0);
   const [done, setDone] = useState(false);
+  const [think, setThink] = useState(() => {
+    try {
+      return window.localStorage.getItem("rbiq-think") !== "off";
+    } catch {
+      return true;
+    }
+  });
+  const [shown, setShown] = useState(false);
   const q = qs[i];
+  const hideChoices = !seconds && think && !shown;
+  const toggleThink = () => {
+    const next = !think;
+    setThink(next);
+    try {
+      window.localStorage.setItem("rbiq-think", next ? "on" : "off");
+    } catch {
+      /* ignore */
+    }
+  };
 
   useEffect(() => {
     if (!seconds || pick !== null || done) return;
@@ -310,6 +341,7 @@ function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; s
     } else {
       setI(i + 1);
       setPick(null);
+      setShown(false);
     }
   };
 
@@ -342,6 +374,11 @@ function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; s
         <span>Streak {streak}</span>
         <span>+{xp} XP</span>
       </div>
+      {!seconds ? (
+        <button type="button" className="rbiq-think-toggle" aria-pressed={think} onClick={toggleThink}>
+          Think first: {think ? "On" : "Off"}
+        </button>
+      ) : null}
       {seconds ? (
         <div className="rbiq-clock" aria-label={`${Math.ceil(left)} seconds left`}>
           <span style={{ transform: `scaleX(${answered ? 0 : left / seconds})` }} />
@@ -358,6 +395,14 @@ function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; s
         </div>
       ) : null}
       <p className="rbiq-quiz__prompt">{q.prompt}</p>
+      {hideChoices ? (
+        <div className="rbiq-think">
+          <p>Make your call before you see the choices. Say it out loud: what do you see, and what is the answer?</p>
+          <button type="button" className="rbiq-think__btn" onClick={() => setShown(true)}>
+            I've got my answer
+          </button>
+        </div>
+      ) : (
       <div className="rbiq-answers">
         {q.options.map((o, idx) => {
           const state = !answered ? undefined : idx === q.answer ? "right" : idx === pick ? "wrong" : "dim";
@@ -369,6 +414,7 @@ function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; s
           );
         })}
       </div>
+      )}
       {answered ? (
         <div className="rbiq-replay" role="status">
           <p className="rbiq-replay__tag">{pick === q.answer ? "Correct call" : pick === -1 ? "Clock ran out" : "Replay"}</p>

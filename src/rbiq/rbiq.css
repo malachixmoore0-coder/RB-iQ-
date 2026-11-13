@@ -446,3 +446,25 @@
 }
 .rbiq-chip rect { fill: var(--rb-red); }
 .rbiq-chip text { fill: #fff; font-family: var(--rb-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em; }
+.rbiq-route { stroke: var(--rb-ink); stroke-width: 1.8; stroke-linejoin: round; }
+.rbiq-route--hl { stroke: var(--rb-gold); stroke-width: 2.4; }
+.rbiq-season__sub { margin: 8px 0 0; color: var(--rb-muted); font-size: 14px; }
+.rbiq-phase { margin: 0; padding: 18px 6px 6px; font-family: var(--rb-mono); font-size: 11px; color: var(--rb-gold); border-bottom: 1px solid var(--rb-rule); }
+.rbiq-sched li:has(.rbiq-phase) { border-bottom: 1px solid var(--rb-rule); }
+.rbiq-think-toggle { margin: 0 0 12px; padding: 4px 10px; background: transparent; border: 1px solid var(--rb-rule); color: var(--rb-muted); font-family: var(--rb-mono); font-size: 11px; cursor: pointer; }
+.rbiq-think-toggle[aria-pressed="true"] { border-color: var(--rb-gold); color: var(--rb-gold); }
+.rbiq-think { padding: 16px 18px; background: var(--rb-panel); border-left: 4px solid var(--rb-gold); }
+.rbiq-think p { margin: 0 0 12px; line-height: 1.5; font-size: 15px; max-width: 60ch; }
+.rbiq-think__btn {
+  padding: 12px 20px;
+  background: var(--rb-gold);
+  color: var(--rb-ground);
+  border: 0;
+  font-family: var(--rb-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 19px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.rbiq-think__btn:active { transform: scale(0.98); }
