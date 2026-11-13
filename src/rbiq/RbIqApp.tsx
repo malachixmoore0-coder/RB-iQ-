@@ -390,7 +390,7 @@ function Quiz({ questions, seconds, onDone, onExit }: { questions: Question[]; s
         <div className="rbiq-quiz__fig">
           <DiagramView d={q.diagram} />
           <p className="rbiq-legend">
-            <span className="rbiq-legend__hl">Gold</span> = what the question is about. White = your offense. <span className="rbiq-legend__red">Red</span> = the defense and the RB path.
+            <span className="rbiq-legend__hl">Gold</span> = what the question is about. White jerseys = your offense. <span className="rbiq-legend__red">Red</span> jerseys = defense. <span className="rbiq-legend__blue">Blue</span> = coverage zones.
           </p>
         </div>
       ) : null}

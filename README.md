@@ -50,7 +50,8 @@ src/
     data.ts          weeks 1, 3, 4, 7, 9, 13, 14 content, coverage library, season assembly
     advanced.ts      fronts, reading the front, option/RPO, protection, systems, personnel, pre-snap checklist
     visuals.ts       the diagram + highlight attached to every quiz question
-    Diagram.tsx      SVG drawing engine: line plays, coverages, formations, scoreboard
+    broadcast.tsx    broadcast camera renderer: perspective turf, player figures, badges
+    Diagram.tsx      play, coverage and formation diagrams (drawn through broadcast.tsx), scoreboard
     RbIqApp.tsx      player card, season map, quiz engine, drill, exam, library
     rbiq.css         app styles (broadcast navy, signal red, stadium gold)
 ```

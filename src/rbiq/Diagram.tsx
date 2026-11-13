@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { BroadcastField, PEllipse, PLine, PPath, PPoly, PRect, PText } from "./broadcast";
+import type { Person } from "./broadcast";
 import type { CoverageId, Def, Diagram as DiagramSpec, Situation } from "./data";
 
 type P = { x: number; y: number; l: string };
@@ -169,63 +171,7 @@ const C: Record<CoverageId, CovShape> = {
   },
 };
 
-function Markers() {
-  return (
-    <defs>
-      <marker id="rbiq-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-        <path d="M0 0 L10 5 L0 10 z" className="rbiq-arrowhead" />
-      </marker>
-      <marker id="rbiq-arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-        <path d="M0 0 L10 5 L0 10 z" className="rbiq-arrowhead rbiq-arrowhead--red" />
-      </marker>
-      <marker id="rbiq-arrow-gold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-        <path d="M0 0 L10 5 L0 10 z" className="rbiq-arrowhead rbiq-arrowhead--gold" />
-      </marker>
-    </defs>
-  );
-}
-
-function Field({ children, label, viewBox = "0 0 400 290" }: { children: ReactNode; label: string; viewBox?: string }) {
-  const yard = [40, 80, 120, 160, 200, 240, 280];
-  return (
-    <svg className="rbiq-field" viewBox={viewBox} role="img" aria-label={label}>
-      <Markers />
-      <rect className="rbiq-field__turf" x="0" y="0" width="400" height="290" />
-      {yard.map((y) => (
-        <line key={y} className="rbiq-field__yard" x1="0" x2="400" y1={y} y2={y} />
-      ))}
-      <line className="rbiq-field__hash" x1="150" x2="150" y1="0" y2="290" />
-      <line className="rbiq-field__hash" x1="250" x2="250" y1="0" y2="290" />
-      {children}
-    </svg>
-  );
-}
-
-/** A player token: jersey circle, facemask on the side he faces, position label. */
-function Player({ x, y, side, l, hl, r = 9, muted }: { x: number; y: number; side: "off" | "def"; l?: string; hl?: boolean; r?: number; muted?: boolean }) {
-  const face = side === "off" ? -1 : 1;
-  const cls = `rbiq-pl rbiq-pl--${side}${hl ? " rbiq-pl--hl" : ""}${muted ? " rbiq-pl--muted" : ""}`;
-  return (
-    <g className={cls}>
-      {hl ? <circle className="rbiq-pl__ring" cx={x} cy={y} r={r + 5} /> : null}
-      <circle className="rbiq-pl__body" cx={x} cy={y} r={r} />
-      <path className="rbiq-pl__mask" d={`M${x - r * 0.6} ${y + face * r * 0.55} Q ${x} ${y + face * r * 1.25} ${x + r * 0.6} ${y + face * r * 0.55}`} />
-      {l ? (
-        <text className="rbiq-pl__txt" x={x} y={y + (l.length > 2 ? 2.2 : 2.6)} textAnchor="middle" style={{ fontSize: l.length > 2 ? r * 0.62 : r * 0.82 }}>
-          {l}
-        </text>
-      ) : null}
-    </g>
-  );
-}
-
-function OffenseO({ x, y, hl, l }: { x: number; y: number; hl?: boolean; l?: string }) {
-  return <Player x={x} y={y} side="off" l={l} hl={hl} />;
-}
-
-function Defender({ p }: { p: { x: number; y: number; l?: string; hl?: boolean } }) {
-  return <Player x={p.x} y={p.y} side="def" l={p.l} hl={p.hl} />;
-}
+const toPerson = (p: { x: number; y: number; l?: string; hl?: boolean }, side: "off" | "def"): Person => ({ x: p.x, y: p.y, l: p.l, hl: p.hl, side });
 
 export function CoverageField({
   id,
@@ -246,17 +192,28 @@ export function CoverageField({
     hl: motion && p.l === "W" ? true : rotate && p.l === "S" ? true : false,
   }));
   const wr = trips ? WR_TRIPS : WR_2X2;
+  const people: Person[] = [
+    ...wr.map((w) => toPerson({ ...w, l: "WR" }, "off")),
+    ...OL.map((x) => ({ x, y: 207, side: "off" as const })),
+    toPerson({ ...QB, l: "QB" }, "off"),
+    toPerson({ ...RB, l: "RB" }, "off"),
+    ...DL.map((d) => toPerson(d, "def")),
+    ...pts.map((p) => toPerson(p, "def")),
+  ];
   return (
-    <Field label={view === "pre" ? "Pre-snap defensive alignment" : "Post-snap coverage picture"}>
-      <line className="rbiq-field__los" x1="0" x2="400" y1="200" y2="200" />
+    <BroadcastField
+      region={{ x0: 6, x1: 394, y0: 50, y1: 268 }} scale={1.35}
+      people={people}
+      label={view === "pre" ? "Pre-snap defensive alignment" : "Post-snap coverage picture"}
+    >
       {view === "post"
         ? s.zones.map((z, i) => (
-            <ellipse key={i} className={z.deep ? "rbiq-zone rbiq-zone--deep" : "rbiq-zone rbiq-zone--under"} cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry} />
+            <PEllipse key={i} className={z.deep ? "rbiq-zone rbiq-zone--deep" : "rbiq-zone rbiq-zone--under"} cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry} />
           ))
         : null}
       {view === "post"
         ? s.man.map((m, i) => (
-            <line
+            <PLine
               key={i}
               className={m.blitz ? "rbiq-man rbiq-man--blitz" : "rbiq-man"}
               x1={m.from[0]}
@@ -269,31 +226,17 @@ export function CoverageField({
         : null}
       {motion ? (
         <>
-          <path className="rbiq-motion" d="M95 220 Q 180 236 262 220" markerEnd="url(#rbiq-arrow)" />
-          <line className="rbiq-move rbiq-move--hl" x1="170" y1="166" x2="250" y2="174" markerEnd="url(#rbiq-arrow-gold)" />
+          <PPath className="rbiq-motion" d="M95 220 Q 180 236 262 220" markerEnd="url(#rbiq-arrow)" />
+          <PLine className="rbiq-move rbiq-move--hl" x1={170} y1={166} x2={250} y2={174} markerEnd="url(#rbiq-arrow-gold)" />
         </>
       ) : null}
       {rotate ? (
         <>
-          <line className="rbiq-move rbiq-move--hl" x1="290" y1="88" x2="300" y2="150" markerEnd="url(#rbiq-arrow-gold)" />
-          <line className="rbiq-move rbiq-move--hl" x1="110" y1="88" x2="196" y2="70" markerEnd="url(#rbiq-arrow-gold)" />
+          <PLine className="rbiq-move rbiq-move--hl" x1={290} y1={88} x2={300} y2={150} markerEnd="url(#rbiq-arrow-gold)" />
+          <PLine className="rbiq-move rbiq-move--hl" x1={110} y1={88} x2={196} y2={70} markerEnd="url(#rbiq-arrow-gold)" />
         </>
       ) : null}
-      {wr.map((w) => (
-        <OffenseO key={w.l} x={w.x} y={w.y} l={w.l} />
-      ))}
-      {OL.map((x) => (
-        <Player key={x} x={x} y={207} side="off" r={8} />
-      ))}
-      <OffenseO x={QB.x} y={QB.y} l="QB" />
-      <OffenseO x={RB.x} y={RB.y} l="RB" />
-      {DL.map((d) => (
-        <Defender key={d.x} p={d} />
-      ))}
-      {pts.map((p, i) => (
-        <Defender key={i} p={p} />
-      ))}
-    </Field>
+    </BroadcastField>
   );
 }
 
@@ -321,128 +264,113 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
   if (d.path === "zone") {
     rbPath = (
       <>
-        <path className="rbiq-path" d={`M200 266 Q 214 236 ${GAP_X["B-R"]} 196 L ${GAP_X["B-R"]} 176`} markerEnd="url(#rbiq-arrow-red)" />
-        <path className="rbiq-path rbiq-path--alt" d={`M200 266 Q 214 230 218 214 Q 205 196 ${GAP_X["A-L"]} 176`} markerEnd="url(#rbiq-arrow-red)" />
-        <path className="rbiq-path rbiq-path--alt" d={`M200 266 Q 250 240 ${GAP_X["C-R"]} 196 L ${GAP_X["C-R"] + 6} 176`} markerEnd="url(#rbiq-arrow-red)" />
+        <PPath className="rbiq-path" d={`M200 266 Q 214 236 ${GAP_X["B-R"]} 196 L ${GAP_X["B-R"]} 176`} markerEnd="url(#rbiq-arrow-red)" />
+        <PPath className="rbiq-path rbiq-path--alt" d={`M200 266 Q 214 230 218 214 Q 205 196 ${GAP_X["A-L"]} 176`} markerEnd="url(#rbiq-arrow-red)" />
+        <PPath className="rbiq-path rbiq-path--alt" d={`M200 266 Q 250 240 ${GAP_X["C-R"]} 196 L ${GAP_X["C-R"] + 6} 176`} markerEnd="url(#rbiq-arrow-red)" />
       </>
     );
   } else if (d.path === "press-cut") {
     rbPath = (
       <>
-        <path className="rbiq-path" d={`M200 266 Q 220 236 ${GAP_X["B-R"] - 4} 210`} />
-        <path className="rbiq-path rbiq-path--alt" d={`M${GAP_X["B-R"] - 4} 210 Q 220 196 ${GAP_X["A-L"]} 172`} markerEnd="url(#rbiq-arrow-red)" />
+        <PPath className="rbiq-path" d={`M200 266 Q 220 236 ${GAP_X["B-R"] - 4} 210`} />
+        <PPath className="rbiq-path rbiq-path--alt" d={`M${GAP_X["B-R"] - 4} 210 Q 220 196 ${GAP_X["A-L"]} 172`} markerEnd="url(#rbiq-arrow-red)" />
       </>
     );
   } else if (d.path === "dance") {
-    rbPath = <path className="rbiq-path" d="M200 266 L215 256 L188 248 L222 240 L186 232 L214 226 L196 220" markerEnd="url(#rbiq-arrow-red)" />;
+    rbPath = <PPath className="rbiq-path" d="M200 266 L215 256 L188 248 L222 240 L186 232 L214 226 L196 220" markerEnd="url(#rbiq-arrow-red)" />;
   } else if (d.path === "sideline") {
-    rbPath = <path className="rbiq-path" d="M200 266 Q 300 230 340 150 L 360 110" markerEnd="url(#rbiq-arrow-red)" />;
+    rbPath = <PPath className="rbiq-path" d="M200 266 Q 300 230 340 150 L 360 110" markerEnd="url(#rbiq-arrow-red)" />;
   } else if (aimX !== undefined) {
     const start = d.pitch ? `M${rb.x + 7} ${rb.y - 2} L 244 266` : `M${rb.x} ${rb.y - 8}`;
     const counter = d.counter ? ` L 186 262 L 190 258` : "";
     const ctrlX = d.pitch ? aimX - 10 : (rb.x + aimX) / 2 + 6;
     rbPath = (
       <>
-        <path className="rbiq-path" d={`${start}${counter} Q ${ctrlX} 250 ${aimX} 198 L ${aimX} 174`} markerEnd="url(#rbiq-arrow-red)" />
-        {d.target !== undefined ? <circle className="rbiq-target" cx={d.target} cy={200} r="9" /> : null}
+        <PPath className="rbiq-path" d={`${start}${counter} Q ${ctrlX} 250 ${aimX} 198 L ${aimX} 174`} markerEnd="url(#rbiq-arrow-red)" />
+        {d.target !== undefined ? <PEllipse className="rbiq-target" cx={d.target} cy={200} rx={9} ry={6} /> : null}
       </>
     );
   }
 
-  // Zoom to the action: frame the line, the backfield and every drawn defender.
-  const xs = [80, 345, aimX ?? 200, ...(d.defenders ?? []).flatMap((p) => [p.x, p.to?.[0] ?? p.x])];
-  const ys = [125, ...(d.defenders ?? []).flatMap((p) => [p.y, p.to?.[1] ?? p.y])];
+  // Frame the action: the line, the backfield and every drawn defender.
+  const xs = [104, 296, aimX ?? 200, ...(d.defenders ?? []).flatMap((p) => [p.x, p.to?.[0] ?? p.x])];
+  const ys = [140, ...(d.defenders ?? []).flatMap((p) => [p.y, p.to?.[1] ?? p.y])];
   if (d.path === "sideline") xs.push(365), ys.push(105);
-  if (letters || d.techs) ys.push(130);
-  const minX = Math.max(0, Math.min(...xs) - 26);
-  const maxX = Math.min(400, Math.max(...xs) + 26);
-  const minY = Math.max(0, Math.min(...ys) - 24);
-  const viewBox = `${minX} ${minY} ${maxX - minX} ${290 - minY}`;
-  const chip = d.label ? (
-    <g className="rbiq-chip">
-      <rect x={minX + 8} y={minY + 8} width={d.label.length * 6.6 + 18} height={20} rx="3" />
-      <text x={minX + 17} y={minY + 22}>
-        {d.label.toUpperCase()}
-      </text>
-    </g>
-  ) : null;
+  if (letters || d.techs) ys.push(132);
+  const minX = Math.max(0, Math.min(...xs) - 30);
+  const maxX = Math.min(400, Math.max(...xs) + 30);
+  const minY = Math.min(...ys) - 12;
+  const nearY = Math.max(qb.y, rb.y, d.lead ? 257 : 0, ...(d.defenders ?? []).flatMap((p) => [p.y, p.to?.[1] ?? p.y])) + 14;
+
+  const people: Person[] = [
+    ...LX.map((x, i) => ({ x, y: 208, side: "off" as const, l: LPOS[i], hl: pullIdx.has(i), muted: i === 5 })),
+    { x: qb.x, y: qb.y, side: "off", l: "QB" },
+    { x: rb.x, y: rb.y, side: "off", l: "RB" },
+    ...(d.lead ? [{ x: 200, y: 257, side: "off" as const, l: "FB" }] : []),
+    ...(d.defenders ?? []).map((p) => toPerson(p, "def")),
+  ];
 
   return (
-    <Field label={d.label ?? "Line of scrimmage diagram"} viewBox={viewBox}>
-      {d.box ? <rect className="rbiq-box" x="118" y="138" width="214" height="60" rx="4" /> : null}
-      <line className="rbiq-field__los" x1="0" x2="400" y1="196" y2="196" />
-      {d.gap ? <rect className="rbiq-gap" x={GAP_X[d.gap] - 13} y={148} width="26" height="66" rx="4" /> : null}
+    <BroadcastField region={{ x0: minX, x1: maxX, y0: minY, y1: Math.min(296, nearY) }} scale={1.18} people={people} los={196} label={d.label ?? "Line of scrimmage diagram"} chip={d.label}>
+      {d.box ? <PRect className="rbiq-box" x={118} y={138} width={214} height={60} /> : null}
+      {d.gap ? <PRect className="rbiq-gap" x={GAP_X[d.gap] - 13} y={150} width={26} height={62} /> : null}
       {letters
         ? Object.entries(GAP_X).map(([k, x]) => (
-            <text key={k} className="rbiq-gap__letter" x={x} y={140} textAnchor="middle">
+            <PText key={k} className="rbiq-gap__letter" x={x} y={186} size={20}>
               {k[0]}
-            </text>
+            </PText>
           ))
         : null}
       {d.techs
         ? TECHS.map(([t, x, y]) => (
             <g key={t}>
-              <line className="rbiq-tech__tick" x1={x} x2={x} y1={y + 3} y2={196} />
-              <text className="rbiq-tech" x={x} y={y} textAnchor="middle">
+              <PLine className="rbiq-tech__tick" x1={x} x2={x} y1={y + 3} y2={196} />
+              <PText className="rbiq-tech" x={x} y={y} size={10}>
                 {t}
-              </text>
+              </PText>
             </g>
           ))
         : null}
       {(d.doubles ?? []).map(([a, b]) => (
-        <g key={`${a}-${b}`}>
-          <path className="rbiq-double" d={`M${LX[a]} 198 L ${(LX[a] + LX[b]) / 2} 186 L ${LX[b]} 198`} />
-        </g>
+        <PPath key={`${a}-${b}`} className="rbiq-double" d={`M${LX[a]} 198 L ${(LX[a] + LX[b]) / 2} 186 L ${LX[b]} 198`} />
       ))}
       {d.zone
         ? LX.slice(0, 5).map((x) => (
-            <line key={x} className="rbiq-step" x1={x} y1={198} x2={x + (d.zone === "R" ? 12 : -12)} y2={188} markerEnd="url(#rbiq-arrow)" />
+            <PLine key={x} className="rbiq-step" x1={x} y1={198} x2={x + (d.zone === "R" ? 12 : -12)} y2={186} markerEnd="url(#rbiq-arrow)" />
           ))
         : null}
       {(d.pullers ?? []).map((p, i) => (
-        <path
+        <PPath
           key={i}
           className="rbiq-pull"
           d={`M${LX[p.from]} 218 L ${LX[p.from]} ${226 + i * 6} L ${p.to} ${226 + i * 6} L ${p.to} 194`}
           markerEnd="url(#rbiq-arrow-gold)"
         />
       ))}
-      {LX.map((x, i) => (
-        <Player key={x} x={x} y={208} side="off" r={10} l={LPOS[i]} hl={pullIdx.has(i)} muted={i === 5} />
-      ))}
       {d.draw
         ? LX.slice(0, 5).map((x) => (
-            <line key={`set${x}`} className="rbiq-step" x1={x} y1={218} x2={x} y2={230} markerEnd="url(#rbiq-arrow)" />
+            <PLine key={`set${x}`} className="rbiq-step" x1={x} y1={216} x2={x} y2={228} markerEnd="url(#rbiq-arrow)" />
           ))
         : null}
-      {d.draw ? <line className="rbiq-move" x1={200} y1={246} x2={200} y2={262} markerEnd="url(#rbiq-arrow)" /> : null}
+      {d.draw ? <PLine className="rbiq-move" x1={200} y1={246} x2={200} y2={262} markerEnd="url(#rbiq-arrow)" /> : null}
       {d.draw ? (
         <>
-          <line className="rbiq-move rbiq-move--hl" x1={158} y1={186} x2={132} y2={230} markerEnd="url(#rbiq-arrow-gold)" />
-          <line className="rbiq-move rbiq-move--hl" x1={272} y1={186} x2={300} y2={230} markerEnd="url(#rbiq-arrow-gold)" />
+          <PLine className="rbiq-move rbiq-move--hl" x1={158} y1={186} x2={132} y2={230} markerEnd="url(#rbiq-arrow-gold)" />
+          <PLine className="rbiq-move rbiq-move--hl" x1={272} y1={186} x2={300} y2={230} markerEnd="url(#rbiq-arrow-gold)" />
         </>
       ) : null}
-      {d.lead ? (
-        <>
-          <OffenseO x={200} y={257} l="FB" />
-          <path className="rbiq-pull" d={`M200 249 Q ${aimX ?? 245} 236 ${aimX ?? 245} 200 L 245 168`} markerEnd="url(#rbiq-arrow-gold)" />
-        </>
-      ) : null}
-      {d.pitch ? <line className="rbiq-pitch" x1={qb.x + 6} y1={qb.y + 4} x2={242} y2={264} /> : null}
+      {d.lead ? <PPath className="rbiq-pull" d={`M200 249 Q ${aimX ?? 245} 236 ${aimX ?? 245} 200 L 245 168`} markerEnd="url(#rbiq-arrow-gold)" /> : null}
+      {d.pitch ? <PLine className="rbiq-pitch" x1={qb.x + 6} y1={qb.y + 4} x2={242} y2={264} /> : null}
       {rbPath}
-      <OffenseO x={qb.x} y={qb.y} l="QB" />
-      <OffenseO x={rb.x} y={rb.y} l="RB" />
       {(d.defenders ?? []).map((p: Def, i) => (
         <g key={i}>
           {p.to ? (
-            <line className={p.hl ? "rbiq-move rbiq-move--hl" : "rbiq-move"} x1={p.x} y1={p.y} x2={p.to[0]} y2={p.to[1]} markerEnd={p.hl ? "url(#rbiq-arrow-gold)" : "url(#rbiq-arrow)"} />
+            <PLine className={p.hl ? "rbiq-move rbiq-move--hl" : "rbiq-move"} x1={p.x} y1={p.y} x2={p.to[0]} y2={p.to[1]} markerEnd={p.hl ? "url(#rbiq-arrow-gold)" : "url(#rbiq-arrow)"} />
           ) : null}
-          {p.man ? <line className="rbiq-man" x1={p.x} y1={p.y} x2={rb.x} y2={rb.y - 8} /> : null}
-          <Defender p={p} />
+          {p.man ? <PLine className="rbiq-man" x1={p.x} y1={p.y} x2={rb.x} y2={rb.y - 8} /> : null}
         </g>
       ))}
-      {chip}
-    </Field>
+    </BroadcastField>
   );
 }
 
@@ -533,42 +461,32 @@ export function FormationField({ d }: { d: FormSpec }) {
   const hlRole = d.hl === "te" ? "te" : d.hl === "wr" ? "wr" : d.hl === "backs" ? "back" : d.hl === "qb" ? "qb" : null;
   const ROUTE_CLASS = { route: "rbiq-route", pull: "rbiq-pull", run: "rbiq-path", pitch: "rbiq-pitch", motion: "rbiq-motion" } as const;
 
+  const backs = offense.filter((o) => o.r === "back");
+  const people: Person[] = [
+    ...LX.slice(0, 5).map((x) => ({ x, y: 208, side: "off" as const })),
+    ...offense.map((o) => {
+      const label =
+        o.r === "te" ? "TE" : o.r === "qb" ? "QB" : o.r === "wr" ? "WR"
+        : d.set === "flexbone" && o.y < 230 ? "SB"
+        : backs.length > 1 && o.y < 262 ? "FB" : "RB";
+      return { x: o.x, y: o.y, side: "off" as const, l: label, hl: hlRole === o.r };
+    }),
+    ...defs.map((p) => toPerson(p, "def")),
+  ];
+
   return (
-    <Field label="Offensive formation and defensive front" viewBox="0 56 400 232">
-      {d.box ? <rect className="rbiq-box" x="112" y="138" width="196" height="60" rx="4" /> : null}
-      <line className="rbiq-field__los" x1="0" x2="400" y1="198" y2="198" />
+    <BroadcastField region={{ x0: 6, x1: 394, y0: 66, y1: Math.max(...offense.map((o) => o.y)) + 12 }} scale={1.3} people={people} los={198} label="Offensive formation and defensive front" chip={d.label}>
+      {d.box ? <PRect className="rbiq-box" x={112} y={138} width={196} height={60} /> : null}
       {(d.routes ?? []).map((r, i) => {
         const k = r.kind ?? "route";
         const cls = `${ROUTE_CLASS[k]}${r.hl ? " rbiq-route--hl" : ""}`;
         const marker = k === "pitch" ? undefined : r.hl || k === "pull" ? "url(#rbiq-arrow-gold)" : k === "run" ? "url(#rbiq-arrow-red)" : "url(#rbiq-arrow)";
-        return <polyline key={`rt${i}`} className={cls} fill="none" points={r.pts.map((p) => p.join(",")).join(" ")} markerEnd={marker} />;
+        return <PPoly key={`rt${i}`} className={cls} pts={r.pts} markerEnd={marker} />;
       })}
-      {LX.slice(0, 5).map((x) => (
-        <Player key={x} x={x} y={208} side="off" r={11} />
-      ))}
-      {offense.map((o, i) => {
-        const backs = offense.filter((b) => b.r === "back");
-        const label =
-          o.r === "te" ? "TE" : o.r === "qb" ? "QB" : o.r === "wr" ? "WR"
-          : d.set === "flexbone" && o.y < 230 ? "SB"
-          : backs.length > 1 && o.y < 262 ? "FB" : "RB";
-        return <Player key={i} x={o.x} y={o.y} side="off" r={11} l={label} hl={hlRole === o.r} />;
-      })}
-      {defs.map((p, i) => (
-        <g key={i}>
-          {p.to ? <line className={p.hl ? "rbiq-move rbiq-move--hl" : "rbiq-move"} x1={p.x} y1={p.y} x2={p.to[0]} y2={p.to[1]} markerEnd={p.hl ? "url(#rbiq-arrow-gold)" : "url(#rbiq-arrow)"} /> : null}
-          <Player x={p.x} y={p.y} side="def" l={p.l} hl={p.hl} r={11} />
-        </g>
-      ))}
-      {d.label ? (
-        <g className="rbiq-chip">
-          <rect x={8} y={64} width={d.label.length * 6.6 + 18} height={20} rx="3" />
-          <text x={17} y={78}>
-            {d.label.toUpperCase()}
-          </text>
-        </g>
-      ) : null}
-    </Field>
+      {defs.map((p, i) =>
+        p.to ? <PLine key={i} className={p.hl ? "rbiq-move rbiq-move--hl" : "rbiq-move"} x1={p.x} y1={p.y} x2={p.to[0]} y2={p.to[1]} markerEnd={p.hl ? "url(#rbiq-arrow-gold)" : "url(#rbiq-arrow)"} /> : null,
+      )}
+    </BroadcastField>
   );
 }
 

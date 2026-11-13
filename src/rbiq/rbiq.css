@@ -483,3 +483,54 @@
 .rbiq-pl--hl .rbiq-pl__txt { fill: #0a1630; }
 .rbiq-pl--hl .rbiq-pl__mask { stroke: #0a1630; }
 .rbiq-pl__ring { fill: rgba(242, 183, 5, 0.18); stroke: var(--rb-gold); stroke-width: 1.5; }
+
+/* ---------- broadcast view ---------- */
+.rbiq-field--bc { max-height: none; aspect-ratio: 4 / 3; border-radius: 4px; }
+.rbiq-bc__stripe { fill: rgba(255, 255, 255, 0.045); }
+.rbiq-bc__yard { stroke: rgba(255, 255, 255, 0.55); stroke-width: 1.4; }
+.rbiq-bc__hash { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1; }
+.rbiq-bc__los { stroke: #3d8bff; stroke-width: 2.4; opacity: 0.9; }
+.rbiq-field--bc .rbiq-zone { stroke-width: 1.4; }
+.rbiq-field--bc .rbiq-zone--deep { fill: rgba(64, 150, 255, 0.3); stroke: rgba(140, 200, 255, 0.85); }
+.rbiq-field--bc .rbiq-zone--under { fill: rgba(64, 150, 255, 0.16); stroke: rgba(140, 200, 255, 0.55); }
+.rbiq-field--bc .rbiq-gap { fill: rgba(242, 183, 5, 0.35); stroke: var(--rb-gold); stroke-width: 2; }
+.rbiq-field--bc .rbiq-box { fill: rgba(242, 183, 5, 0.14); stroke: var(--rb-gold); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.rbiq-field--bc .rbiq-path { stroke-width: 3; }
+.rbiq-field--bc .rbiq-pull { stroke-width: 2.8; }
+.rbiq-field--bc .rbiq-route { stroke-width: 2.2; }
+.rbiq-field--bc .rbiq-route--hl { stroke-width: 2.8; }
+.rbiq-field--bc .rbiq-man { stroke: rgba(255, 255, 255, 0.85); }
+.rbiq-field--bc .rbiq-gap__letter { fill: var(--rb-gold); paint-order: stroke; stroke: rgba(0, 0, 0, 0.6); stroke-width: 3px; }
+.rbiq-field--bc .rbiq-tech { paint-order: stroke; stroke: rgba(0, 0, 0, 0.7); stroke-width: 3px; }
+
+.rbiq-fig__shadow { fill: rgba(0, 0, 0, 0.42); }
+.rbiq-fig__glow { fill: rgba(242, 183, 5, 0.35); stroke: var(--rb-gold); stroke-width: 1.4; }
+.rbiq-fig__cleat { fill: #111; }
+.rbiq-fig__num { font-family: var(--rb-display); font-style: italic; font-weight: 800; }
+.rbiq-fig__helmet { stroke-width: 0.8; }
+.rbiq-fig__mask { stroke: #c9ced8; stroke-width: 0.9; fill: none; }
+
+/* offense: white jerseys, white helmets with a navy stripe (seen from behind) */
+.rbiq-fig--off .rbiq-fig__jersey { fill: #f4f2ee; stroke: #9aa6ba; stroke-width: 0.6; }
+.rbiq-fig--off .rbiq-fig__arm { fill: #e6e3dc; }
+.rbiq-fig--off .rbiq-fig__pants { fill: #c9a96a; }
+.rbiq-fig--off .rbiq-fig__helmet { fill: #f4f2ee; stroke: #9aa6ba; }
+.rbiq-fig--off .rbiq-fig__stripe { fill: #0a1630; }
+.rbiq-fig--off .rbiq-fig__num { fill: #0a1630; }
+.rbiq-fig--muted .rbiq-fig__jersey { fill: #dfe5ef; }
+
+/* defense: red jerseys, navy helmets with facemasks (facing the camera) */
+.rbiq-fig--def .rbiq-fig__jersey { fill: #c8213a; stroke: #5c0f1b; stroke-width: 0.6; }
+.rbiq-fig--def .rbiq-fig__arm { fill: #a81b30; }
+.rbiq-fig--def .rbiq-fig__pants { fill: #f1f1f1; }
+.rbiq-fig--def .rbiq-fig__helmet { fill: #13224a; stroke: #050b1c; }
+.rbiq-fig--def .rbiq-fig__num { fill: #fff; }
+
+/* floating position badges, like a broadcast telestrator */
+.rbiq-fig__badge circle { fill: #0d1d44; stroke: #7fbaff; stroke-width: 1.2; }
+.rbiq-fig__badge text { fill: #fff; font-family: var(--rb-display); font-style: italic; font-weight: 800; }
+.rbiq-fig--hl .rbiq-fig__badge circle { fill: var(--rb-gold); stroke: #fff; }
+.rbiq-fig--hl .rbiq-fig__badge text { fill: #0a1630; }
+.rbiq-fig--hl .rbiq-fig__jersey { stroke: var(--rb-gold); stroke-width: 1.6; }
+.rbiq-fig--hl .rbiq-fig__helmet { stroke: var(--rb-gold); stroke-width: 1.4; }
+.rbiq-legend__blue { color: #7fbaff; font-weight: 700; }
