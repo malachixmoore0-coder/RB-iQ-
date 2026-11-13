@@ -201,22 +201,30 @@ function Field({ children, label, viewBox = "0 0 400 290" }: { children: ReactNo
   );
 }
 
-function OffenseO({ x, y, hl }: { x: number; y: number; hl?: boolean }) {
-  return <circle className={hl ? "rbiq-o rbiq-o--hl" : "rbiq-o"} cx={x} cy={y} r="7" />;
-}
-
-function Defender({ p }: { p: { x: number; y: number; l?: string; hl?: boolean } }) {
+/** A player token: jersey circle, facemask on the side he faces, position label. */
+function Player({ x, y, side, l, hl, r = 9, muted }: { x: number; y: number; side: "off" | "def"; l?: string; hl?: boolean; r?: number; muted?: boolean }) {
+  const face = side === "off" ? -1 : 1;
+  const cls = `rbiq-pl rbiq-pl--${side}${hl ? " rbiq-pl--hl" : ""}${muted ? " rbiq-pl--muted" : ""}`;
   return (
-    <g className={p.hl ? "rbiq-d rbiq-d--hl" : "rbiq-d"}>
-      {p.hl ? <circle className="rbiq-d__ring" cx={p.x} cy={p.y} r="13" /> : null}
-      <path d={`M${p.x - 7} ${p.y - 6} L${p.x} ${p.y + 6} L${p.x + 7} ${p.y - 6}`} />
-      {p.l ? (
-        <text x={p.x} y={p.y - 10} textAnchor="middle">
-          {p.l}
+    <g className={cls}>
+      {hl ? <circle className="rbiq-pl__ring" cx={x} cy={y} r={r + 5} /> : null}
+      <circle className="rbiq-pl__body" cx={x} cy={y} r={r} />
+      <path className="rbiq-pl__mask" d={`M${x - r * 0.6} ${y + face * r * 0.55} Q ${x} ${y + face * r * 1.25} ${x + r * 0.6} ${y + face * r * 0.55}`} />
+      {l ? (
+        <text className="rbiq-pl__txt" x={x} y={y + (l.length > 2 ? 2.2 : 2.6)} textAnchor="middle" style={{ fontSize: l.length > 2 ? r * 0.62 : r * 0.82 }}>
+          {l}
         </text>
       ) : null}
     </g>
   );
+}
+
+function OffenseO({ x, y, hl, l }: { x: number; y: number; hl?: boolean; l?: string }) {
+  return <Player x={x} y={y} side="off" l={l} hl={hl} />;
+}
+
+function Defender({ p }: { p: { x: number; y: number; l?: string; hl?: boolean } }) {
+  return <Player x={p.x} y={p.y} side="def" l={p.l} hl={p.hl} />;
 }
 
 export function CoverageField({
@@ -272,13 +280,13 @@ export function CoverageField({
         </>
       ) : null}
       {wr.map((w) => (
-        <OffenseO key={w.l} x={w.x} y={w.y} />
+        <OffenseO key={w.l} x={w.x} y={w.y} l={w.l} />
       ))}
       {OL.map((x) => (
-        <rect key={x} className="rbiq-ol" x={x - 6} y={202} width="12" height="12" rx="2" />
+        <Player key={x} x={x} y={207} side="off" r={8} />
       ))}
-      <OffenseO x={QB.x} y={QB.y} />
-      <OffenseO x={RB.x} y={RB.y} />
+      <OffenseO x={QB.x} y={QB.y} l="QB" />
+      <OffenseO x={RB.x} y={RB.y} l="RB" />
       {DL.map((d) => (
         <Defender key={d.x} p={d} />
       ))}
@@ -400,21 +408,7 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
         />
       ))}
       {LX.map((x, i) => (
-        <g key={x}>
-          <rect
-            className={pullIdx.has(i) ? "rbiq-ol rbiq-ol--hl" : i === 5 ? "rbiq-ol rbiq-ol--te" : "rbiq-ol"}
-            x={x - 8}
-            y={200}
-            width="16"
-            height="16"
-            rx="3"
-          />
-          {!d.pullers?.length ? (
-            <text className="rbiq-pos" x={x} y={230} textAnchor="middle">
-              {LPOS[i]}
-            </text>
-          ) : null}
-        </g>
+        <Player key={x} x={x} y={208} side="off" r={10} l={LPOS[i]} hl={pullIdx.has(i)} muted={i === 5} />
       ))}
       {d.draw
         ? LX.slice(0, 5).map((x) => (
@@ -430,14 +424,14 @@ export function PlayField({ d, letters }: { d: PlaySpec; letters: boolean }) {
       ) : null}
       {d.lead ? (
         <>
-          <OffenseO x={200} y={257} />
+          <OffenseO x={200} y={257} l="FB" />
           <path className="rbiq-pull" d={`M200 249 Q ${aimX ?? 245} 236 ${aimX ?? 245} 200 L 245 168`} markerEnd="url(#rbiq-arrow-gold)" />
         </>
       ) : null}
       {d.pitch ? <line className="rbiq-pitch" x1={qb.x + 6} y1={qb.y + 4} x2={242} y2={264} /> : null}
       {rbPath}
-      <OffenseO x={qb.x} y={qb.y} />
-      <OffenseO x={rb.x} y={rb.y} hl />
+      <OffenseO x={qb.x} y={qb.y} l="QB" />
+      <OffenseO x={rb.x} y={rb.y} l="RB" />
       {(d.defenders ?? []).map((p: Def, i) => (
         <g key={i}>
           {p.to ? (
@@ -550,24 +544,20 @@ export function FormationField({ d }: { d: FormSpec }) {
         return <polyline key={`rt${i}`} className={cls} fill="none" points={r.pts.map((p) => p.join(",")).join(" ")} markerEnd={marker} />;
       })}
       {LX.slice(0, 5).map((x) => (
-        <rect key={x} className="rbiq-ol" x={x - 8} y={200} width="16" height="16" rx="3" />
+        <Player key={x} x={x} y={208} side="off" r={11} />
       ))}
-      {offense.map((o, i) =>
-        o.r === "te" ? (
-          <rect key={i} className={hlRole === "te" ? "rbiq-ol rbiq-ol--hl" : "rbiq-ol rbiq-ol--te"} x={o.x - 8} y={o.y - 8} width="16" height="16" rx="3" />
-        ) : (
-          <OffenseO key={i} x={o.x} y={o.y} hl={hlRole === o.r} />
-        ),
-      )}
-      {hlRole
-        ? offense
-            .filter((o) => o.r === hlRole)
-            .map((o, i) => <circle key={`r${i}`} className="rbiq-o-ring" cx={o.x} cy={o.y} r="13" />)
-        : null}
+      {offense.map((o, i) => {
+        const backs = offense.filter((b) => b.r === "back");
+        const label =
+          o.r === "te" ? "TE" : o.r === "qb" ? "QB" : o.r === "wr" ? "WR"
+          : d.set === "flexbone" && o.y < 230 ? "SB"
+          : backs.length > 1 && o.y < 262 ? "FB" : "RB";
+        return <Player key={i} x={o.x} y={o.y} side="off" r={11} l={label} hl={hlRole === o.r} />;
+      })}
       {defs.map((p, i) => (
         <g key={i}>
           {p.to ? <line className={p.hl ? "rbiq-move rbiq-move--hl" : "rbiq-move"} x1={p.x} y1={p.y} x2={p.to[0]} y2={p.to[1]} markerEnd={p.hl ? "url(#rbiq-arrow-gold)" : "url(#rbiq-arrow)"} /> : null}
-          <Defender p={p} />
+          <Player x={p.x} y={p.y} side="def" l={p.l} hl={p.hl} r={11} />
         </g>
       ))}
       {d.label ? (

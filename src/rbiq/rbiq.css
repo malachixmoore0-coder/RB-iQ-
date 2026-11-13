@@ -468,3 +468,18 @@
   transition: transform 0.15s ease;
 }
 .rbiq-think__btn:active { transform: scale(0.98); }
+/* player tokens */
+.rbiq-pl__body { stroke-width: 1.6; }
+.rbiq-pl--off .rbiq-pl__body { fill: #f3f1ec; stroke: #0a1630; }
+.rbiq-pl--off .rbiq-pl__txt { fill: #0a1630; }
+.rbiq-pl--off .rbiq-pl__mask { stroke: #0a1630; }
+.rbiq-pl--muted .rbiq-pl__body { fill: #c9d3e4; }
+.rbiq-pl--def .rbiq-pl__body { fill: var(--rb-red); stroke: #5c0f1b; }
+.rbiq-pl--def .rbiq-pl__txt { fill: #fff; }
+.rbiq-pl--def .rbiq-pl__mask { stroke: #fff; }
+.rbiq-pl__mask { fill: none; stroke-width: 1.6; stroke-linecap: round; opacity: 0.85; }
+.rbiq-pl__txt { font-family: var(--rb-mono); font-weight: 700; pointer-events: none; }
+.rbiq-pl--hl .rbiq-pl__body { fill: var(--rb-gold); stroke: #6b4f00; }
+.rbiq-pl--hl .rbiq-pl__txt { fill: #0a1630; }
+.rbiq-pl--hl .rbiq-pl__mask { stroke: #0a1630; }
+.rbiq-pl__ring { fill: rgba(242, 183, 5, 0.18); stroke: var(--rb-gold); stroke-width: 1.5; }
