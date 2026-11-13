@@ -142,7 +142,7 @@ function kindOf(p: Person): Kind {
   return p.y >= 140 ? "lb" : "db";
 }
 
-function Figure({ p, P, scale }: { p: Person; P: Proj; scale: number }) {
+function Figure({ p, P, scale, part }: { p: Person; P: Proj; scale: number; part: "body" | "labels" }) {
   const g = P(p.x, p.y);
   const u = g.s * scale;
   const k = kindOf(p);
@@ -153,27 +153,34 @@ function Figure({ p, P, scale }: { p: Person; P: Proj; scale: number }) {
   const off = p.side === "off";
   const showBadge = (!off && label) || (off && p.hl && label);
   const cls = `rbiq-fig rbiq-fig--${p.side}${p.hl ? " rbiq-fig--hl" : ""}`;
+  const tf = `translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) scale(${u.toFixed(3)})`;
+  if (part === "labels") {
+    return (
+      <g className={cls} transform={tf}>
+        {off && label && !p.hl ? (
+          <g className="rbiq-fig__tag">
+            <rect x={-label.length * 2.4 - 3} y={2} width={label.length * 4.8 + 6} height={8} rx={2} />
+            <text x="0" y="8.4" textAnchor="middle">
+              {label}
+            </text>
+          </g>
+        ) : null}
+        {showBadge ? (
+          <g className={`rbiq-fig__badge${off ? " rbiq-fig__badge--off" : ""}`}>
+            <circle cx="0" cy={-h - 9} r="7.5" />
+            <text x="0" y={-h - 9 + (label.length > 2 ? 1.8 : 2.4)} textAnchor="middle" style={{ fontSize: label.length > 2 ? 5.2 : 7 }}>
+              {label}
+            </text>
+          </g>
+        ) : null}
+      </g>
+    );
+  }
   return (
-    <g className={cls} transform={`translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) scale(${u.toFixed(3)})`}>
+    <g className={cls} transform={tf}>
       {p.hl ? <ellipse className="rbiq-fig__glow" cx="0" cy="-1" rx={w * 0.62} ry={w * 0.2} /> : null}
       <ellipse className="rbiq-fig__shadow" cx="2" cy="-0.5" rx={w * 0.46} ry={w * 0.13} />
       <image href={`${SPRITE_BASE}${k}.png`} x={-w / 2} y={-h} width={w} height={h} preserveAspectRatio="xMidYMax meet" />
-      {off && label && !p.hl ? (
-        <g className="rbiq-fig__tag">
-          <rect x={-label.length * 2.4 - 3} y={2} width={label.length * 4.8 + 6} height={8} rx={2} />
-          <text x="0" y="8.4" textAnchor="middle">
-            {label}
-          </text>
-        </g>
-      ) : null}
-      {showBadge ? (
-        <g className={`rbiq-fig__badge${off ? " rbiq-fig__badge--off" : ""}`}>
-          <circle cx="0" cy={-h - 9} r="7.5" />
-          <text x="0" y={-h - 9 + (label.length > 2 ? 1.8 : 2.4)} textAnchor="middle" style={{ fontSize: label.length > 2 ? 5.2 : 7 }}>
-            {label}
-          </text>
-        </g>
-      ) : null}
     </g>
   );
 }
@@ -266,7 +273,10 @@ export function BroadcastField({
         <PLine x1={xL} x2={xR} y1={los} y2={los} className="rbiq-bc__los" />
         {children}
         {sorted.map((p, i) => (
-          <Figure key={i} p={p} P={P} scale={scale} />
+          <Figure key={i} p={p} P={P} scale={scale} part="body" />
+        ))}
+        {sorted.map((p, i) => (
+          <Figure key={`l${i}`} p={p} P={P} scale={scale} part="labels" />
         ))}
       </Ctx.Provider>
       <rect x="0" y="0" width={VW} height={VH} fill="url(#bc-vignette)" pointerEvents="none" />
